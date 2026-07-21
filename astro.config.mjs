@@ -5,9 +5,12 @@ import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 import { SITE_URL } from './src/config.js';
 
+import cloudflare from "@astrojs/cloudflare";
+
 export default defineConfig({
   site: SITE_URL,
   trailingSlash: 'always',
+
   integrations: [
     preact(),
     sitemap({
@@ -15,10 +18,14 @@ export default defineConfig({
       entryLimit: 5000,
     }),
   ],
+
   build: {
     format: 'directory',
   },
+
   vite: {
     plugins: [tailwindcss()],
   },
+
+  adapter: cloudflare()
 });
