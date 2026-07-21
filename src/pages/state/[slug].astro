@@ -1,0 +1,154 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import StatCard from '../../components/StatCard.astro';
+import CostBar from '../../components/CostBar.astro';
+import FaqBlock from '../../components/FaqBlock.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import { rates, tier1, stateSlug, stateRank, regionAverage } from '../../lib/data';
+import { costs, money } from '../../lib/calc';
+import { stateFaqs, ordinal, AVG_HOME_KWH } from '../../lib/content';
+import { breadcrumbSchema, faqSchema } from '../../lib/seo';
+
+export function getStaticPaths() {
+  return rates.states.map((s) => ({ params: { slug: stateSlug(s) }, props: { state: s } }));
+}
+
+const { state: s } = Astro.props;
+const year = rates.period.slice(0, 4);
+const rank = stateRank(s.abbr);
+const diffPct = Math.round(((s.cents - rates.national.cents) / rates.national.cents) * 100);
+const changePct = ((s.cents - s.prev) / s.prev) * 100;
+const avgBill = (AVG_HOME_KWH * s.cents) / 100;
+
+const applianceCosts = tier1
+  .map((a) => ({ a, c: costs(a, s.cents) }))
+  .sort((x, y) => y.c.month - x.c.month);
+const top10 = applianceCosts.slice(0, 10);
+const maxMonth = top10[0].c.month;
+
+const regionStates = rates.states.filter((x) => x.region === s.region);
+const faqs = stateFaqs(s);
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'States', href: '/states/' },
+  { name: s.name, href: `/state/${stateSlug(s)}/` },
+];
+
+const title = `${s.name} Electricity Cost (${year}): ${s.cents}¢/kWh — What Appliances Cost to Run`;
+const description = `${s.name}'s average residential electricity rate is ${s.cents}¢/kWh (${rates.periodLabel}) — ${ordinal(rank)} cheapest in the U.S. See what every major appliance costs to run at ${s.name} rates, from AC to EV charging.`;
+const schema = [breadcrumbSchema(crumbs), faqSchema(faqs)];
+---
+<BaseLayout title={title} description={description} schema={schema}>
+  <div class="max-w-6xl mx-auto px-4 pt-6">
+    <Breadcrumbs crumbs={crumbs} />
+    <article>
+      <header class="max-w-3xl">
+        <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-ink-900 dark:text-ink-100">
+          Electricity Costs in {s.name}
+        </h1>
+        <p class="mt-4 text-lg text-ink-600 dark:text-ink-400 leading-relaxed">
+          {s.name} residents pay an average of <strong class="text-brand-700 dark:text-brand-400">{s.cents}¢ per kilowatt-hour</strong> as
+          of {rates.periodLabel} — the {ordinal(rank)} cheapest of the 51 U.S. jurisdictions we track,
+          {Math.abs(diffPct)}% {diffPct >= 0 ? 'above' : 'below'} the national average.
+          For a typical home using {AVG_HOME_KWH} kWh a month, that's a bill of about <strong class="text-ink-900 dark:text-ink-100">{money(avgBill)}</strong>.
+        </p>
+      </header>
+
+      <div class="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <StatCard label="Average rate" value={`${s.cents}¢`} sub="per kWh, residential" accent />
+        <StatCard label="U.S. rank" value={ordinal(rank)} sub="cheapest of 51" />
+        <StatCard label="vs. U.S. average" value={`${diffPct >= 0 ? '+' : ''}${diffPct}%`} sub={`national: ${rates.national.cents}¢/kWh`} />
+        <StatCard label="Change vs. last year" value={`${changePct >= 0 ? '+' : ''}${changePct.toFixed(1)}%`} sub={`was ${s.prev}¢/kWh`} />
+      </div>
+
+      <AdSlot variant="banner" />
+
+      <div class="lg:grid lg:grid-cols-[1fr_300px] lg:gap-10">
+        <div>
+          <section class="mt-8">
+            <h2 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-100 mb-2">The most expensive things to run in {s.name}</h2>
+            <p class="text-sm text-ink-600 dark:text-ink-400 mb-4">Monthly cost at typical usage and {s.name}'s current rate.</p>
+            <div class="rounded-2xl border border-ink-200 dark:border-ink-800 bg-white dark:bg-ink-900 p-5">
+              {top10.map(({ a, c }) => (
+                <CostBar label={a.name} value={c.month} max={maxMonth} display={money(c.month)} href={`/appliance/${a.slug}/${stateSlug(s)}/`} highlight />
+              ))}
+            </div>
+          </section>
+
+          <section class="mt-10">
+            <h2 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-100 mb-4">Running costs for every appliance</h2>
+            <div class="overflow-x-auto rounded-2xl border border-ink-200 dark:border-ink-800">
+              <table class="w-full text-sm bg-white dark:bg-ink-900">
+                <thead>
+                  <tr class="text-left text-xs uppercase tracking-wide text-ink-500 border-b-2 border-ink-200 dark:border-ink-700">
+                    <th class="px-4 py-3">Appliance</th>
+                    <th class="px-4 py-3 text-right">Per day</th>
+                    <th class="px-4 py-3 text-right">Per month</th>
+                    <th class="px-4 py-3 text-right">Per year</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {applianceCosts.map(({ a, c }) => (
+                    <tr class="border-b border-ink-100 dark:border-ink-800 last:border-0 hover:bg-brand-50/50 dark:hover:bg-brand-900/10">
+                      <td class="px-4 py-2.5"><a href={`/appliance/${a.slug}/${stateSlug(s)}/`} class="text-brand-700 dark:text-brand-400 hover:underline font-medium">{a.name}</a></td>
+                      <td class="px-4 py-2.5 text-right tabular">{money(c.day)}</td>
+                      <td class="px-4 py-2.5 text-right tabular font-semibold">{money(c.month)}</td>
+                      <td class="px-4 py-2.5 text-right tabular">{money(c.year)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="mt-10">
+            <h2 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-100 mb-4">Rates across the {s.region}</h2>
+            <div class="overflow-x-auto rounded-2xl border border-ink-200 dark:border-ink-800">
+              <table class="w-full text-sm bg-white dark:bg-ink-900">
+                <thead>
+                  <tr class="text-left text-xs uppercase tracking-wide text-ink-500 border-b-2 border-ink-200 dark:border-ink-700">
+                    <th class="px-4 py-3">State</th>
+                    <th class="px-4 py-3 text-right">Rate (¢/kWh)</th>
+                    <th class="px-4 py-3 text-right">Typical monthly bill</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...regionStates].sort((a, b) => a.cents - b.cents).map((x) => (
+                    <tr class:list={['border-b border-ink-100 dark:border-ink-800 last:border-0', x.abbr === s.abbr && 'bg-brand-50/60 dark:bg-brand-900/15 font-semibold']}>
+                      <td class="px-4 py-2.5">
+                        {x.abbr === s.abbr
+                          ? <span>{x.name}</span>
+                          : <a href={`/state/${stateSlug(x)}/`} class="text-brand-700 dark:text-brand-400 hover:underline">{x.name}</a>}
+                      </td>
+                      <td class="px-4 py-2.5 text-right tabular">{x.cents.toFixed(1)}</td>
+                      <td class="px-4 py-2.5 text-right tabular">{money((AVG_HOME_KWH * x.cents) / 100)}</td>
+                    </tr>
+                  ))}
+                  <tr class="border-t-2 border-ink-200 dark:border-ink-700 text-ink-500">
+                    <td class="px-4 py-2.5">{s.region} average</td>
+                    <td class="px-4 py-2.5 text-right tabular">{regionAverage(s.region).toFixed(1)}</td>
+                    <td class="px-4 py-2.5 text-right tabular">{money((AVG_HOME_KWH * regionAverage(s.region)) / 100)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <FaqBlock faqs={faqs} />
+
+          <p class="mt-8 mb-4 text-sm text-ink-600 dark:text-ink-400">
+            Wondering why your bill jumped? Read <a href="/guides/why-is-my-electric-bill-so-high/" class="text-brand-700 dark:text-brand-400 underline">Why Is My Electric Bill So High?</a>
+            or estimate your whole home with the <a href="/" class="text-brand-700 dark:text-brand-400 underline">bill analyzer</a>.
+          </p>
+        </div>
+
+        <aside class="hidden lg:block">
+          <div class="sticky top-20">
+            <AdSlot variant="sidebar" />
+          </div>
+        </aside>
+      </div>
+    </article>
+  </div>
+</BaseLayout>

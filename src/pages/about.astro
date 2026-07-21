@@ -1,0 +1,49 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { SITE_NAME } from '../config.js';
+import { rates, appliances } from '../lib/data';
+import { breadcrumbSchema } from '../lib/seo';
+
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'About', href: '/about/' },
+];
+---
+<BaseLayout title={`About ${SITE_NAME}`} description={`Why ${SITE_NAME} exists: honest, state-aware answers about what home electricity actually costs, computed from current EIA data.`} schema={[breadcrumbSchema(crumbs)]}>
+  <div class="max-w-3xl mx-auto px-4 pt-6 pb-10">
+    <Breadcrumbs crumbs={crumbs} />
+    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-ink-900 dark:text-ink-100">About {SITE_NAME}</h1>
+    <div class="mt-6 prose-custom">
+      <p>
+        {SITE_NAME} answers one deceptively simple question — <em>"how much does this cost to run?"</em> —
+        correctly.
+      </p>
+      <p>
+        Most answers on the internet are wrong for a boring reason: they assume a single national electricity
+        price, often one from years ago. Real U.S. residential rates currently span from about
+        {[...rates.states].sort((a, b) => a.cents - b.cents)[0].cents}¢ to
+        {[...rates.states].sort((a, b) => b.cents - a.cents)[0].cents}¢ per kilowatt-hour — a spread wide enough
+        that the same space heater can cost $40 or $115 a month depending on where it's plugged in. An answer
+        that ignores your state isn't an estimate; it's a coin flip.
+      </p>
+      <p>
+        So we built the version we wanted: {appliances.length} appliances with realistic wattage and usage data,
+        priced with <strong>current, state-level rates</strong> refreshed monthly from U.S. Energy Information
+        Administration data, with calculators on every page so you can swap in your own habits. No account, no
+        app, no upsell — the site is free, supported by advertising.
+      </p>
+      <h2>What we care about</h2>
+      <ul>
+        <li><strong>The answer first.</strong> Every page leads with the number you came for, then shows the assumptions behind it.</li>
+        <li><strong>Current data.</strong> Rates carry their vintage ({rates.periodLabel} right now) and update on a schedule, not "whenever."</li>
+        <li><strong>Honest magnitudes.</strong> We'll tell you when something costs pennies and isn't worth optimizing — unplugging your toaster is not a savings plan.</li>
+      </ul>
+      <p>
+        How every figure is computed, including sources and formulas, is documented on the
+        <a href="/methodology/">methodology page</a>. Corrections and suggestions are genuinely welcome via the
+        <a href="/contact/">contact page</a>.
+      </p>
+    </div>
+  </div>
+</BaseLayout>

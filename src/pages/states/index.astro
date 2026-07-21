@@ -1,0 +1,93 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import StatCard from '../../components/StatCard.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import { rates, statesByRate, stateSlug } from '../../lib/data';
+import { money } from '../../lib/calc';
+import { AVG_HOME_KWH, ordinal } from '../../lib/content';
+import { breadcrumbSchema } from '../../lib/seo';
+
+const year = rates.period.slice(0, 4);
+const cheapest = statesByRate[0];
+const priciest = statesByRate[statesByRate.length - 1];
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'States', href: '/states/' },
+];
+const title = `Electricity Rates by State (${rates.periodLabel}): Full Rankings`;
+const description = `Current average residential electricity rates for all 50 states + DC, updated monthly from EIA data. From ${cheapest.name} at ${cheapest.cents}¢/kWh to ${priciest.name} at ${priciest.cents}¢/kWh — see what that means for your bill.`;
+
+const itemList = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'U.S. electricity rates by state',
+  itemListElement: statesByRate.map((s, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: `${s.name} — ${s.cents}¢/kWh`,
+    url: new URL(`/state/${stateSlug(s)}/`, Astro.site).href,
+  })),
+};
+---
+<BaseLayout title={title} description={description} schema={[breadcrumbSchema(crumbs), itemList]}>
+  <div class="max-w-6xl mx-auto px-4 pt-6">
+    <Breadcrumbs crumbs={crumbs} />
+    <header class="max-w-3xl">
+      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-ink-900 dark:text-ink-100">
+        Electricity Rates by State ({year})
+      </h1>
+      <p class="mt-4 text-lg text-ink-600 dark:text-ink-400 leading-relaxed">
+        Average residential rates as of <strong class="text-ink-900 dark:text-ink-100">{rates.periodLabel}</strong>,
+        from EIA data. The spread is enormous: the same appliance costs
+        {(priciest.cents / cheapest.cents).toFixed(1)}× more to run in {priciest.name} than in {cheapest.name}.
+        Click any state for a full running-cost breakdown.
+      </p>
+    </header>
+
+    <div class="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <StatCard label="U.S. average" value={`${rates.national.cents}¢`} sub="per kWh" accent />
+      <StatCard label="Cheapest" value={`${cheapest.cents}¢`} sub={cheapest.name} />
+      <StatCard label="Most expensive" value={`${priciest.cents}¢`} sub={priciest.name} />
+      <StatCard label="Typical bill range" value={`${money((AVG_HOME_KWH * cheapest.cents) / 100)}–${money((AVG_HOME_KWH * priciest.cents) / 100)}`} sub={`at ${AVG_HOME_KWH} kWh/month`} />
+    </div>
+
+    <AdSlot variant="banner" />
+
+    <section class="mt-8 mb-4">
+      <div class="overflow-x-auto rounded-2xl border border-ink-200 dark:border-ink-800">
+        <table class="w-full text-sm bg-white dark:bg-ink-900">
+          <thead>
+            <tr class="text-left text-xs uppercase tracking-wide text-ink-500 border-b-2 border-ink-200 dark:border-ink-700">
+              <th class="px-4 py-3">Rank</th>
+              <th class="px-4 py-3">State</th>
+              <th class="px-4 py-3 text-right">Rate (¢/kWh)</th>
+              <th class="px-4 py-3 text-right">vs. U.S. avg</th>
+              <th class="px-4 py-3 text-right">Change (1 yr)</th>
+              <th class="px-4 py-3 text-right">Typical monthly bill</th>
+            </tr>
+          </thead>
+          <tbody>
+            {statesByRate.map((s, i) => {
+              const diff = Math.round(((s.cents - rates.national.cents) / rates.national.cents) * 100);
+              const change = ((s.cents - s.prev) / s.prev) * 100;
+              return (
+                <tr class="border-b border-ink-100 dark:border-ink-800 last:border-0 hover:bg-brand-50/50 dark:hover:bg-brand-900/10">
+                  <td class="px-4 py-2.5 tabular text-ink-500">{ordinal(i + 1)}</td>
+                  <td class="px-4 py-2.5"><a href={`/state/${stateSlug(s)}/`} class="text-brand-700 dark:text-brand-400 hover:underline font-medium">{s.name}</a></td>
+                  <td class="px-4 py-2.5 text-right tabular font-semibold">{s.cents.toFixed(1)}</td>
+                  <td class="px-4 py-2.5 text-right tabular text-ink-600 dark:text-ink-400">{diff >= 0 ? '+' : ''}{diff}%</td>
+                  <td class:list={['px-4 py-2.5 text-right tabular', change >= 3 ? 'text-red-600 dark:text-red-400' : 'text-ink-600 dark:text-ink-400']}>{change >= 0 ? '+' : ''}{change.toFixed(1)}%</td>
+                  <td class="px-4 py-2.5 text-right tabular">{money((AVG_HOME_KWH * s.cents) / 100)}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <p class="mt-4 text-xs text-ink-500">
+        Typical monthly bill assumes the U.S. average consumption of {AVG_HOME_KWH} kWh/month. Source: {rates.source}.
+      </p>
+    </section>
+  </div>
+</BaseLayout>

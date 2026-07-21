@@ -1,0 +1,65 @@
+---
+import { SITE_NAME } from '../config.js';
+import { rates, tier1, CATEGORIES } from '../lib/data';
+import { costs } from '../lib/calc';
+
+const year = new Date().getFullYear();
+const popular = [...tier1]
+  .sort((a, b) => costs(b, rates.national.cents).month - costs(a, rates.national.cents).month)
+  .slice(0, 8);
+const bigStates = ['CA', 'TX', 'FL', 'NY', 'PA', 'OH', 'IL', 'GA'];
+const stateLinks = rates.states.filter((s) => bigStates.includes(s.abbr));
+---
+<footer class="mt-16 border-t border-ink-200 dark:border-ink-800 bg-ink-100/60 dark:bg-ink-900/40">
+  <div class="max-w-6xl mx-auto px-4 py-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 text-sm">
+    <div>
+      <h2 class="font-bold text-ink-900 dark:text-ink-100 mb-3">{SITE_NAME}</h2>
+      <p class="text-ink-600 dark:text-ink-400 leading-relaxed">
+        Real running costs for everything in your home, computed with current
+        electricity rates for your state — not a stale national average.
+      </p>
+      <p class="mt-3 text-xs text-ink-500">
+        Rates updated {rates.periodLabel} · Source: <a href={rates.sourceUrl} rel="noopener" class="underline hover:text-ink-700 dark:hover:text-ink-300">EIA</a>
+      </p>
+    </div>
+    <nav aria-label="Popular appliances">
+      <h2 class="font-semibold text-ink-900 dark:text-ink-100 mb-3">Biggest energy users</h2>
+      <ul class="space-y-1.5">
+        {popular.map((a) => (
+          <li><a href={`/appliance/${a.slug}/`} class="text-ink-600 dark:text-ink-400 hover:text-brand-700 dark:hover:text-brand-400">{a.name}</a></li>
+        ))}
+      </ul>
+    </nav>
+    <nav aria-label="Electricity costs by state">
+      <h2 class="font-semibold text-ink-900 dark:text-ink-100 mb-3">Costs by state</h2>
+      <ul class="space-y-1.5">
+        {stateLinks.map((s) => (
+          <li><a href={`/state/${s.name.toLowerCase().replace(/[.,]/g, '').replace(/\s+/g, '-')}/`} class="text-ink-600 dark:text-ink-400 hover:text-brand-700 dark:hover:text-brand-400">{s.name} electricity costs</a></li>
+        ))}
+        <li><a href="/states/" class="font-medium text-brand-700 dark:text-brand-400 hover:underline">All 50 states →</a></li>
+      </ul>
+    </nav>
+    <nav aria-label="Site">
+      <h2 class="font-semibold text-ink-900 dark:text-ink-100 mb-3">Explore</h2>
+      <ul class="space-y-1.5">
+        {Object.entries(CATEGORIES).slice(0, 4).map(([key, c]) => (
+          <li><a href={`/appliances/#${key}`} class="text-ink-600 dark:text-ink-400 hover:text-brand-700 dark:hover:text-brand-400">{c.label}</a></li>
+        ))}
+        <li><a href="/calculator/" class="text-ink-600 dark:text-ink-400 hover:text-brand-700 dark:hover:text-brand-400">Cost calculator</a></li>
+        <li><a href="/guides/" class="text-ink-600 dark:text-ink-400 hover:text-brand-700 dark:hover:text-brand-400">Guides</a></li>
+        <li><a href="/methodology/" class="text-ink-600 dark:text-ink-400 hover:text-brand-700 dark:hover:text-brand-400">How we calculate</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="border-t border-ink-200 dark:border-ink-800">
+    <div class="max-w-6xl mx-auto px-4 py-5 flex flex-wrap items-center justify-between gap-3 text-xs text-ink-500">
+      <p>© {year} {SITE_NAME}. Estimates for information only — see <a href="/methodology/" class="underline hover:text-ink-700 dark:hover:text-ink-300">methodology</a>.</p>
+      <nav class="flex gap-4" aria-label="Legal">
+        <a href="/about/" class="hover:text-ink-700 dark:hover:text-ink-300">About</a>
+        <a href="/contact/" class="hover:text-ink-700 dark:hover:text-ink-300">Contact</a>
+        <a href="/privacy/" class="hover:text-ink-700 dark:hover:text-ink-300">Privacy</a>
+        <a href="/terms/" class="hover:text-ink-700 dark:hover:text-ink-300">Terms</a>
+      </nav>
+    </div>
+  </div>
+</footer>

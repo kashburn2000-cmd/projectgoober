@@ -1,0 +1,78 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import AdSlot from '../components/AdSlot.astro';
+import FaqBlock from '../components/FaqBlock.astro';
+import CostCalculator from '../islands/CostCalculator.tsx';
+import { rates } from '../lib/data';
+import { breadcrumbSchema, faqSchema, webAppSchema } from '../lib/seo';
+
+const stateOptions = rates.states.map((s) => ({ abbr: s.abbr, name: s.name, cents: s.cents }));
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Calculator', href: '/calculator/' },
+];
+const faqs = [
+  {
+    q: 'How do I calculate the electricity cost of an appliance?',
+    a: 'Multiply the appliance’s wattage by hours used per day, divide by 1,000 to get kilowatt-hours, then multiply by your electricity rate. Example: a 1,500 W heater × 8 hours = 12 kWh; at 17¢/kWh that’s about $2.04 per day. This calculator does exactly that with your state’s current rate.',
+  },
+  {
+    q: 'Where do I find an appliance’s wattage?',
+    a: 'Check the label on the back or bottom of the device, the power brick, or the manual. Labels state maximum draw — actual use is often lower. Our appliance pages list realistic typical wattages for over 140 devices, or a $10 smart plug with energy monitoring will measure the real number.',
+  },
+  {
+    q: 'What electricity rate should I use?',
+    a: 'The state averages built into this calculator are current EIA figures and work well for estimates. For precision, divide the total charges on your last bill by the kWh used — that captures delivery fees and taxes your nominal rate leaves out.',
+  },
+  {
+    q: 'Why is my bill higher than the appliance math suggests?',
+    a: 'Bills include fixed charges, delivery fees, and taxes on top of usage. Always-on devices (water heaters, fridges, standby electronics) also run more hours than people assume. Try the whole-home bill analyzer on our homepage to see the full picture.',
+  },
+];
+const title = `Electricity Cost Calculator: Watts to Dollars (${rates.period.slice(0, 4)} Rates)`;
+const description = `Convert watts and hours into cost per hour, day, month, and year using current electricity rates for all 50 states. Works for any appliance or device.`;
+const schema = [
+  breadcrumbSchema(crumbs),
+  faqSchema(faqs),
+  webAppSchema({ name: 'Electricity Cost Calculator', description, path: '/calculator/' }),
+];
+---
+<BaseLayout title={title} description={description} schema={schema}>
+  <div class="max-w-4xl mx-auto px-4 pt-6">
+    <Breadcrumbs crumbs={crumbs} />
+    <header class="max-w-2xl">
+      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-ink-900 dark:text-ink-100">
+        Electricity Cost Calculator
+      </h1>
+      <p class="mt-4 text-lg text-ink-600 dark:text-ink-400 leading-relaxed">
+        Enter any device's wattage and daily hours — or its energy per use — and get the real cost
+        at your state's current rate ({rates.periodLabel} data).
+      </p>
+    </header>
+
+    <div class="mt-6">
+      <CostCalculator client:load states={stateOptions} nationalCents={rates.national.cents} />
+    </div>
+
+    <AdSlot variant="banner" />
+
+    <section class="mt-10 prose-custom">
+      <h2>How the math works</h2>
+      <p>
+        Electricity is billed in <strong>kilowatt-hours (kWh)</strong> — one kilowatt-hour is 1,000 watts
+        running for one hour. The formula behind this calculator:
+      </p>
+      <p><strong>watts ÷ 1,000 × hours per day × rate (¢/kWh) = daily cost</strong></p>
+      <p>
+        For appliances that work in discrete sessions (dishwashers, dryers, EV charges), it's simpler to
+        count energy per use: <strong>kWh per use × uses per week</strong>, converted to a monthly figure.
+        Not sure what a device draws? Browse our <a href="/appliances/">appliance database</a> for measured
+        typical values, or check <a href="/guides/what-is-a-kilowatt-hour/">what a kilowatt-hour actually is</a>.
+      </p>
+    </section>
+
+    <FaqBlock faqs={faqs} />
+    <div class="mb-4"></div>
+  </div>
+</BaseLayout>

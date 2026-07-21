@@ -1,0 +1,16 @@
+[
+  { "slug": "washing-machine", "name": "Washing Machine", "cat": "laundry", "tier": 1, "watts": 500, "use": { "t": "c", "kwh": 0.4, "cpw": 5 },
+    "blurb": "On a cold wash, the machine itself uses only 0.3–0.5 kWh per load for the motor and controls. Hot washes are a different story: heating the water can multiply the true energy cost of a load by five or more, it just shows up on the water heater's tab.",
+    "tips": ["Wash cold by default — modern detergents are formulated for it, and water heating is most of a hot load's cost.", "High spin speeds cost pennies and save dollars by cutting dryer time.", "Full loads beat multiple small ones; the motor energy is nearly the same either way."] },
+  { "slug": "electric-dryer", "name": "Electric Dryer", "cat": "laundry", "tier": 1, "watts": 5000, "use": { "t": "c", "kwh": 3.0, "cpw": 5 },
+    "blurb": "A conventional electric dryer is one of the most power-hungry appliances in the house, drawing around 5,000 watts and using 2.5–4 kWh per load. For a family drying five loads a week, it's frequently a top-three line item on the bill.",
+    "tips": ["Clean the lint filter every load and the vent duct yearly — restricted airflow directly extends every cycle.", "Use the moisture sensor setting instead of timed dry; overdrying is pure waste.", "Dry consecutive loads back-to-back to reuse residual heat."] },
+  { "slug": "heat-pump-dryer", "name": "Heat Pump Dryer", "cat": "laundry", "tier": 1, "watts": 1000, "use": { "t": "c", "kwh": 1.3, "cpw": 5 },
+    "blurb": "Heat pump dryers recycle their hot air instead of blowing it out a vent, using roughly 40–60% less electricity per load than conventional electric dryers. Cycles run longer, but the per-load cost drops to about a third." },
+  { "slug": "gas-dryer", "name": "Gas Dryer (Electric Components)", "cat": "laundry", "tier": 2, "watts": 400, "use": { "t": "c", "kwh": 0.4, "cpw": 5 },
+    "blurb": "A gas dryer's heat comes from natural gas, but the drum motor and blower still use about 0.3–0.5 kWh of electricity per load. Its electric footprint is small — the gas meter carries the real cost." },
+  { "slug": "clothes-iron", "name": "Clothes Iron", "cat": "laundry", "tier": 2, "watts": 1100, "use": { "t": "c", "kwh": 0.35, "cpw": 2 },
+    "blurb": "Irons draw 1,000–1,800 watts but cycle their element once hot. A weekly half-hour ironing session lands around a third of a kilowatt-hour — noticeable wattage, negligible bill impact." },
+  { "slug": "garment-steamer", "name": "Garment Steamer", "cat": "laundry", "tier": 2, "watts": 1200, "use": { "t": "c", "kwh": 0.2, "cpw": 2 },
+    "blurb": "Handheld and upright steamers boil water at 1,000–1,800 watts for a few minutes per session. Touching up a few outfits a week costs less than a dollar a year in most states." }
+]

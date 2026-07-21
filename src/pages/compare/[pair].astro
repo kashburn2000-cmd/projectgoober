@@ -1,0 +1,104 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import StatCard from '../../components/StatCard.astro';
+import FaqBlock from '../../components/FaqBlock.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import { comparisons, getAppliance, rates, statesByRate } from '../../lib/data';
+import { costs, money, kwh, wattsLabel, usageLabel } from '../../lib/calc';
+import { breadcrumbSchema, faqSchema } from '../../lib/seo';
+
+export function getStaticPaths() {
+  return comparisons.map((c) => ({ params: { pair: `${c.a}-vs-${c.b}` }, props: { comparison: c } }));
+}
+
+const { comparison: c } = Astro.props;
+const a = getAppliance(c.a);
+const b = getAppliance(c.b);
+const am = costs(a, rates.national.cents);
+const bm = costs(b, rates.national.cents);
+const winner = am.month <= bm.month ? a : b;
+const loser = winner === a ? b : a;
+const wc = winner === a ? am : bm;
+const lc = winner === a ? bm : am;
+const savings = lc.month - wc.month;
+const cheapState = statesByRate[0];
+const dearState = statesByRate[statesByRate.length - 1];
+
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Compare', href: '/compare/' },
+  { name: `${a.name} vs ${b.name}`, href: `/compare/${c.a}-vs-${c.b}/` },
+];
+
+const faqs = [
+  {
+    q: `Which is cheaper to run: a ${a.name.toLowerCase()} or a ${b.name.toLowerCase()}?`,
+    a: `At typical usage and the current U.S. average rate (${rates.national.cents}¢/kWh), the ${winner.name.toLowerCase()} is cheaper: about ${money(wc.month)}/month versus ${money(lc.month)}/month for the ${loser.name.toLowerCase()} — a difference of ${money(savings)} per month.`,
+  },
+  {
+    q: `How much could I save per year by choosing the ${winner.name.toLowerCase()}?`,
+    a: `About ${money(savings * 12)} per year at typical usage and average rates. In ${dearState.name} (${dearState.cents}¢/kWh) the annual gap grows to roughly ${money((costs(loser, dearState.cents).month - costs(winner, dearState.cents).month) * 12)}.`,
+  },
+  {
+    q: 'Do these numbers apply to my state?',
+    a: `The ratio between the two stays the same everywhere, but the dollar gap scales with your rate — from ${cheapState.name} at ${cheapState.cents}¢/kWh to ${dearState.name} at ${dearState.cents}¢/kWh. Open each appliance's page for the exact cost in your state.`,
+  },
+];
+
+const title = `${a.name} vs ${b.name}: Which Costs Less to Run? (${rates.period.slice(0, 4)})`;
+const description = `${a.name} (${money(am.month)}/mo) vs ${b.name} (${money(bm.month)}/mo) at typical usage and current U.S. rates. The math, the verdict, and when the answer flips.`;
+const schema = [breadcrumbSchema(crumbs), faqSchema(faqs)];
+---
+<BaseLayout title={title} description={description} schema={schema}>
+  <div class="max-w-4xl mx-auto px-4 pt-6">
+    <Breadcrumbs crumbs={crumbs} />
+    <article>
+      <header>
+        <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-ink-900 dark:text-ink-100">
+          {a.name} vs {b.name}: Which Costs Less to Run?
+        </h1>
+        <p class="mt-4 text-lg text-ink-600 dark:text-ink-400 leading-relaxed">{c.intro}</p>
+      </header>
+
+      <div class="mt-6 grid sm:grid-cols-2 gap-3">
+        <StatCard label={`${a.name} · per month`} value={money(am.month)} sub={`${usageLabel(a.use)} · ${wattsLabel(a)}`} accent={winner === a} />
+        <StatCard label={`${b.name} · per month`} value={money(bm.month)} sub={`${usageLabel(b.use)} · ${wattsLabel(b)}`} accent={winner === b} />
+      </div>
+
+      <div class="mt-4 rounded-2xl border-2 border-brand-300 dark:border-brand-800 bg-brand-50 dark:bg-brand-900/20 p-5">
+        <p class="text-xs font-bold uppercase tracking-widest text-brand-700 dark:text-brand-400">Verdict</p>
+        <p class="mt-2 text-ink-800 dark:text-ink-200 leading-relaxed">{c.verdict}</p>
+      </div>
+
+      <AdSlot variant="banner" />
+
+      <section class="mt-8">
+        <h2 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-100 mb-4">Side by side</h2>
+        <div class="overflow-x-auto rounded-2xl border border-ink-200 dark:border-ink-800">
+          <table class="w-full text-sm bg-white dark:bg-ink-900">
+            <thead>
+              <tr class="text-left text-xs uppercase tracking-wide text-ink-500 border-b-2 border-ink-200 dark:border-ink-700">
+                <th class="px-4 py-3"></th>
+                <th class="px-4 py-3 text-right">{a.name}</th>
+                <th class="px-4 py-3 text-right">{b.name}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-b border-ink-100 dark:border-ink-800"><td class="px-4 py-2.5 font-medium">Typical power</td><td class="px-4 py-2.5 text-right tabular">{wattsLabel(a)}</td><td class="px-4 py-2.5 text-right tabular">{wattsLabel(b)}</td></tr>
+              <tr class="border-b border-ink-100 dark:border-ink-800"><td class="px-4 py-2.5 font-medium">Typical usage</td><td class="px-4 py-2.5 text-right">{usageLabel(a.use)}</td><td class="px-4 py-2.5 text-right">{usageLabel(b.use)}</td></tr>
+              <tr class="border-b border-ink-100 dark:border-ink-800"><td class="px-4 py-2.5 font-medium">Energy per month</td><td class="px-4 py-2.5 text-right tabular">{kwh(am.kwhMonth)} kWh</td><td class="px-4 py-2.5 text-right tabular">{kwh(bm.kwhMonth)} kWh</td></tr>
+              <tr class="border-b border-ink-100 dark:border-ink-800 bg-brand-50/60 dark:bg-brand-900/15 font-semibold"><td class="px-4 py-2.5">Cost per month (US avg)</td><td class="px-4 py-2.5 text-right tabular">{money(am.month)}</td><td class="px-4 py-2.5 text-right tabular">{money(bm.month)}</td></tr>
+              <tr class="border-b border-ink-100 dark:border-ink-800"><td class="px-4 py-2.5 font-medium">Cost per year (US avg)</td><td class="px-4 py-2.5 text-right tabular">{money(am.year)}</td><td class="px-4 py-2.5 text-right tabular">{money(bm.year)}</td></tr>
+              <tr><td class="px-4 py-2.5 font-medium">Cost per month in {dearState.name}</td><td class="px-4 py-2.5 text-right tabular">{money(costs(a, dearState.cents).month)}</td><td class="px-4 py-2.5 text-right tabular">{money(costs(b, dearState.cents).month)}</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="mt-3 text-xs text-ink-500">Rates as of {rates.periodLabel}. Adjust the assumptions on each appliance's page: <a href={`/appliance/${a.slug}/`} class="underline">{a.name}</a> · <a href={`/appliance/${b.slug}/`} class="underline">{b.name}</a>.</p>
+      </section>
+
+      <FaqBlock faqs={faqs} />
+      <div class="mb-4"></div>
+    </article>
+  </div>
+</BaseLayout>

@@ -1,0 +1,86 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import { appliances, rates, CATEGORIES } from '../../lib/data';
+import { costs, money } from '../../lib/calc';
+import { breadcrumbSchema } from '../../lib/seo';
+
+const byCat = Object.entries(CATEGORIES).map(([key, meta]) => ({
+  key,
+  meta,
+  items: appliances
+    .filter((a) => a.cat === key)
+    .map((a) => ({ ...a, monthly: costs(a, rates.national.cents).month }))
+    .sort((x, y) => y.monthly - x.monthly),
+}));
+
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Appliances', href: '/appliances/' },
+];
+const title = `Electricity Cost of ${appliances.length} Home Appliances (${rates.period.slice(0, 4)})`;
+const description = `Running costs for ${appliances.length} household appliances — from space heaters to phone chargers — computed at current state electricity rates. Sorted by what actually costs the most.`;
+---
+<BaseLayout title={title} description={description} schema={[breadcrumbSchema(crumbs)]}>
+  <div class="max-w-6xl mx-auto px-4 pt-6">
+    <Breadcrumbs crumbs={crumbs} />
+    <header class="max-w-3xl">
+      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-ink-900 dark:text-ink-100">
+        What Everything in Your Home Costs to Run
+      </h1>
+      <p class="mt-4 text-lg text-ink-600 dark:text-ink-400 leading-relaxed">
+        {appliances.length} appliances, each with real wattage data and typical usage patterns.
+        Monthly figures below use the U.S. average rate of {rates.national.cents}¢/kWh ({rates.periodLabel}) —
+        open any appliance for state-by-state numbers.
+      </p>
+      <div class="mt-5">
+        <label class="sr-only" for="filter">Filter appliances</label>
+        <input id="filter" type="search" placeholder={`Search ${appliances.length} appliances…`}
+          class="w-full max-w-md rounded-xl border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900 px-4 py-2.5 text-sm text-ink-900 dark:text-ink-100 focus:outline-none focus:ring-2 focus:ring-brand-500" />
+      </div>
+    </header>
+
+    <AdSlot variant="banner" />
+
+    {byCat.map(({ key, meta, items }) => (
+      <section id={key} class="mt-10 scroll-mt-20" data-cat-section>
+        <h2 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-100 mb-4">
+          <span aria-hidden="true">{meta.icon}</span> {meta.label}
+        </h2>
+        <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((a) => (
+            <a href={`/appliance/${a.slug}/`} data-name={a.name.toLowerCase()}
+              class="appliance-card flex justify-between items-center gap-3 rounded-xl border border-ink-200 dark:border-ink-800 bg-white dark:bg-ink-900 px-4 py-3 hover:border-brand-400 dark:hover:border-brand-600 hover:shadow-sm transition-all">
+              <span class="text-sm font-medium text-ink-900 dark:text-ink-100 truncate">{a.name}</span>
+              <span class="text-sm tabular font-semibold text-brand-700 dark:text-brand-400 shrink-0">{money(a.monthly)}<span class="text-xs font-normal text-ink-400">/mo</span></span>
+            </a>
+          ))}
+        </div>
+      </section>
+    ))}
+    <p id="no-results" class="hidden mt-10 text-ink-500">No appliances match that search.</p>
+    <div class="mb-4"></div>
+  </div>
+
+  <script>
+    const input = document.getElementById('filter') as HTMLInputElement;
+    const cards = [...document.querySelectorAll<HTMLElement>('.appliance-card')];
+    const sections = [...document.querySelectorAll<HTMLElement>('[data-cat-section]')];
+    const empty = document.getElementById('no-results')!;
+    input?.addEventListener('input', () => {
+      const q = input.value.trim().toLowerCase();
+      let any = false;
+      for (const c of cards) {
+        const hit = !q || (c.dataset.name ?? '').includes(q);
+        c.classList.toggle('hidden', !hit);
+        if (hit) any = true;
+      }
+      for (const s of sections) {
+        const visible = s.querySelectorAll('.appliance-card:not(.hidden)').length > 0;
+        s.classList.toggle('hidden', !visible);
+      }
+      empty.classList.toggle('hidden', any);
+    });
+  </script>
+</BaseLayout>

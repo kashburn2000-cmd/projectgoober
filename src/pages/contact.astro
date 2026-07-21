@@ -1,0 +1,31 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { SITE_NAME, CONTACT_EMAIL } from '../config.js';
+import { breadcrumbSchema } from '../lib/seo';
+
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Contact', href: '/contact/' },
+];
+---
+<BaseLayout title={`Contact ${SITE_NAME}`} description={`Questions, corrections, or feedback for ${SITE_NAME} — here's how to reach us.`} schema={[breadcrumbSchema(crumbs)]}>
+  <div class="max-w-3xl mx-auto px-4 pt-6 pb-10">
+    <Breadcrumbs crumbs={crumbs} />
+    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-ink-900 dark:text-ink-100">Contact</h1>
+    <div class="mt-6 prose-custom">
+      <p>
+        Found an error? Have a suggestion, an appliance we should add, or a question about our numbers?
+        Email us:
+      </p>
+      <p>
+        <a href={`mailto:${CONTACT_EMAIL}`} class="text-lg font-semibold">{CONTACT_EMAIL}</a>
+      </p>
+      <p>
+        Corrections get priority — every figure on this site traces to a source (see the
+        <a href="/methodology/">methodology</a>), and we'd rather fix a number today than defend it tomorrow.
+        For privacy-related requests, see our <a href="/privacy/">privacy policy</a>.
+      </p>
+    </div>
+  </div>
+</BaseLayout>

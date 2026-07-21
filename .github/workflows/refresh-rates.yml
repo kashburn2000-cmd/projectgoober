@@ -1,0 +1,38 @@
+name: Refresh electricity rates
+
+on:
+  schedule:
+    # Monthly, on the 5th at 09:17 UTC (EIA publishes with ~2 month lag; any
+    # monthly cadence keeps the site current).
+    - cron: '17 9 5 * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Fetch latest EIA rates
+        env:
+          EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
+        run: node scripts/fetch-rates.mjs
+
+      - name: Commit updated rates
+        run: |
+          if git diff --quiet src/data/rates.json; then
+            echo "Rates unchanged — nothing to commit."
+            exit 0
+          fi
+          git config user.name "rates-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add src/data/rates.json
+          git commit -m "chore: refresh EIA electricity rates"
+          git push

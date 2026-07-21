@@ -1,0 +1,178 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import StatCard from '../../../components/StatCard.astro';
+import CostBar from '../../../components/CostBar.astro';
+import FaqBlock from '../../../components/FaqBlock.astro';
+import AdSlot from '../../../components/AdSlot.astro';
+import { tier1, rates, stateSlug, stateRank, regionAverage, statesByRate } from '../../../lib/data';
+import { costs, money, kwh, wattsLabel, usageLabel } from '../../../lib/calc';
+import { applianceStateFaqs, ordinal } from '../../../lib/content';
+import { breadcrumbSchema, faqSchema } from '../../../lib/seo';
+
+export function getStaticPaths() {
+  return tier1.flatMap((a) =>
+    rates.states.map((s) => ({
+      params: { slug: a.slug, state: stateSlug(s) },
+      props: { appliance: a, state: s },
+    })),
+  );
+}
+
+const { appliance: a, state: s } = Astro.props;
+const here = costs(a, s.cents);
+const nat = costs(a, rates.national.cents);
+const year = rates.period.slice(0, 4);
+const rank = stateRank(s.abbr);
+const diffPct = Math.round(((s.cents - rates.national.cents) / rates.national.cents) * 100);
+const regionAvgCents = regionAverage(s.region);
+const regionCost = costs(a, regionAvgCents);
+
+// Note: no division inside template literals here — the Astro frontmatter
+// scanner misreads `${x / 2}` followed by a later "/" as a regex literal.
+const isHourly = a.use.t === 'h';
+const typicalAmt = isHourly ? (a.use as { h: number }).h : (a.use as { cpw: number }).cpw;
+const lightAmt = isHourly ? Math.max(0.5, typicalAmt * 0.5) : Math.max(1, Math.round(typicalAmt * 0.5));
+const heavyAmt = isHourly ? Math.min(24, typicalAmt * 2) : typicalAmt * 2;
+const usageUnit = isHourly ? ' hrs/day' : '×/week';
+const usageLevels = [
+  { label: 'Light', desc: lightAmt + usageUnit, scale: 0.5 },
+  { label: 'Typical', desc: typicalAmt + usageUnit, scale: 1 },
+  { label: 'Heavy', desc: heavyAmt + usageUnit, scale: 2 },
+];
+
+const regionStates = rates.states.filter((x) => x.region === s.region && x.abbr !== s.abbr);
+const extremes = [statesByRate[0], statesByRate[statesByRate.length - 1]].filter((x) => x.abbr !== s.abbr);
+const otherHere = tier1.filter((x) => x.slug !== a.slug)
+  .map((x) => ({ x, m: costs(x, s.cents).month }))
+  .sort((p, q) => q.m - p.m)
+  .slice(0, 12);
+
+const faqs = applianceStateFaqs(a, s);
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Appliances', href: '/appliances/' },
+  { name: a.name, href: `/appliance/${a.slug}/` },
+  { name: s.name, href: `/appliance/${a.slug}/${stateSlug(s)}/` },
+];
+
+const maxBar = Math.max(here.month, nat.month, regionCost.month);
+const title = `Cost to Run a ${a.name} in ${s.name} (${year}): ${money(here.month)}/Month`;
+const description = `At ${s.name}'s current ${s.cents}¢/kWh average rate, a ${a.name.toLowerCase()} costs about ${money(here.day)}/day or ${money(here.month)}/month at typical usage — ${Math.abs(diffPct)}% ${diffPct >= 0 ? 'above' : 'below'} the U.S. average. Full breakdown by usage level.`;
+const schema = [breadcrumbSchema(crumbs), faqSchema(faqs)];
+---
+<BaseLayout title={title} description={description} schema={schema}>
+  <div class="max-w-6xl mx-auto px-4 pt-6">
+    <Breadcrumbs crumbs={crumbs} />
+    <div class="lg:grid lg:grid-cols-[1fr_300px] lg:gap-10">
+      <article>
+        <header>
+          <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-ink-900 dark:text-ink-100">
+            Cost to Run a {a.name} in {s.name}
+          </h1>
+          <p class="mt-4 text-lg text-ink-600 dark:text-ink-400 leading-relaxed">
+            {s.name}'s average residential electricity rate is
+            <strong class="text-ink-900 dark:text-ink-100">{s.cents}¢/kWh</strong> as of {rates.periodLabel} —
+            the {ordinal(rank)} cheapest in the country, {Math.abs(diffPct)}% {diffPct >= 0 ? 'above' : 'below'} the U.S. average.
+            At typical usage ({usageLabel(a.use)}), a {a.name.toLowerCase()} here costs
+            <strong class="text-brand-700 dark:text-brand-400">{money(here.month)} per month</strong>.
+          </p>
+        </header>
+
+        <div class="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {a.use.t === 'h'
+            ? <StatCard label="Per hour" value={money(here.hour!)} sub={`at ${wattsLabel(a)}`} />
+            : <StatCard label="Per use" value={money(here.perUse!)} sub={`${a.use.kwh} kWh per use`} />}
+          <StatCard label="Per day" value={money(here.day)} sub={usageLabel(a.use)} />
+          <StatCard label="Per month" value={money(here.month)} sub={`${kwh(here.kwhMonth)} kWh`} accent />
+          <StatCard label="Per year" value={money(here.year)} sub={`${kwh(here.kwhYear)} kWh`} />
+        </div>
+
+        <AdSlot variant="banner" />
+
+        <section class="mt-8">
+          <h2 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-100 mb-4">By usage level in {s.name}</h2>
+          <div class="overflow-x-auto rounded-2xl border border-ink-200 dark:border-ink-800">
+            <table class="w-full text-sm bg-white dark:bg-ink-900">
+              <thead>
+                <tr class="text-left text-xs uppercase tracking-wide text-ink-500 border-b-2 border-ink-200 dark:border-ink-700">
+                  <th class="px-4 py-3">Usage</th>
+                  <th class="px-4 py-3 text-right">Per day</th>
+                  <th class="px-4 py-3 text-right">Per month</th>
+                  <th class="px-4 py-3 text-right">Per year</th>
+                </tr>
+              </thead>
+              <tbody>
+                {usageLevels.map((u) => (
+                  <tr class:list={['border-b border-ink-100 dark:border-ink-800 last:border-0', u.scale === 1 && 'bg-brand-50/60 dark:bg-brand-900/15 font-semibold']}>
+                    <td class="px-4 py-2.5">{u.label} <span class="text-ink-400 font-normal">({u.desc})</span></td>
+                    <td class="px-4 py-2.5 text-right tabular">{money(here.day * u.scale)}</td>
+                    <td class="px-4 py-2.5 text-right tabular">{money(here.month * u.scale)}</td>
+                    <td class="px-4 py-2.5 text-right tabular">{money(here.year * u.scale)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="mt-10">
+          <h2 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-100 mb-2">{s.name} vs. the rest of the country</h2>
+          <p class="text-sm text-ink-600 dark:text-ink-400 mb-4">Monthly cost at typical usage.</p>
+          <div class="rounded-2xl border border-ink-200 dark:border-ink-800 bg-white dark:bg-ink-900 p-5">
+            <CostBar label={s.name} value={here.month} max={maxBar} display={money(here.month)} highlight />
+            <CostBar label={`${s.region} average`} value={regionCost.month} max={maxBar} display={money(regionCost.month)} />
+            <CostBar label="U.S. average" value={nat.month} max={maxBar} display={money(nat.month)} />
+          </div>
+        </section>
+
+        <FaqBlock faqs={faqs} />
+
+        <AdSlot variant="banner" />
+
+        <section class="mt-10">
+          <h2 class="text-xl font-bold tracking-tight text-ink-900 dark:text-ink-100 mb-4">{a.name} costs in nearby states</h2>
+          <div class="flex flex-wrap gap-2">
+            {[...regionStates, ...extremes].map((x) => (
+              <a href={`/appliance/${a.slug}/${stateSlug(x)}/`} class="rounded-lg border border-ink-200 dark:border-ink-800 bg-white dark:bg-ink-900 px-3 py-1.5 text-sm text-ink-700 dark:text-ink-300 hover:border-brand-400 hover:text-brand-700 dark:hover:text-brand-400 transition-colors">
+                {x.name} <span class="tabular text-ink-400">{money(costs(a, x.cents).month)}/mo</span>
+              </a>
+            ))}
+          </div>
+        </section>
+
+        <section class="mt-10 mb-4">
+          <h2 class="text-xl font-bold tracking-tight text-ink-900 dark:text-ink-100 mb-4">What else costs to run in {s.name}</h2>
+          <div class="grid gap-2 sm:grid-cols-2">
+            {otherHere.map(({ x, m }) => (
+              <a href={`/appliance/${x.slug}/${stateSlug(s)}/`} class="flex justify-between gap-3 rounded-lg border border-ink-200 dark:border-ink-800 bg-white dark:bg-ink-900 px-3 py-2 text-sm text-ink-700 dark:text-ink-300 hover:border-brand-400 hover:text-brand-700 dark:hover:text-brand-400 transition-colors">
+                <span class="truncate">{x.name}</span>
+                <span class="tabular text-ink-400 shrink-0">{money(m)}/mo</span>
+              </a>
+            ))}
+          </div>
+          <p class="mt-4 text-sm">
+            <a href={`/state/${stateSlug(s)}/`} class="font-medium text-brand-700 dark:text-brand-400 hover:underline">
+              See the full {s.name} electricity cost guide →
+            </a>
+          </p>
+        </section>
+      </article>
+
+      <aside class="hidden lg:block">
+        <div class="sticky top-20">
+          <div class="rounded-2xl border border-ink-200 dark:border-ink-800 bg-white dark:bg-ink-900 p-5 text-sm">
+            <h2 class="font-bold text-ink-900 dark:text-ink-100 mb-3">{s.name} at a glance</h2>
+            <dl class="space-y-2 text-ink-600 dark:text-ink-400">
+              <div class="flex justify-between gap-2"><dt>Avg. rate</dt><dd class="tabular font-bold text-brand-700 dark:text-brand-400">{s.cents}¢/kWh</dd></div>
+              <div class="flex justify-between gap-2"><dt>Rank (cheapest)</dt><dd class="font-medium text-ink-900 dark:text-ink-100">{ordinal(rank)} of 51</dd></div>
+              <div class="flex justify-between gap-2"><dt>vs. U.S. average</dt><dd class="tabular font-medium text-ink-900 dark:text-ink-100">{diffPct >= 0 ? '+' : ''}{diffPct}%</dd></div>
+              <div class="flex justify-between gap-2"><dt>A year ago</dt><dd class="tabular font-medium text-ink-900 dark:text-ink-100">{s.prev}¢/kWh</dd></div>
+            </dl>
+          </div>
+          <AdSlot variant="sidebar" />
+        </div>
+      </aside>
+    </div>
+  </div>
+</BaseLayout>

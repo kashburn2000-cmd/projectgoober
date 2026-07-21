@@ -1,0 +1,28 @@
+---
+/**
+ * Ad container. Renders nothing while ADSENSE_PUB_ID is null, so the layout has
+ * no gaps pre-approval. Once a publisher ID is configured, each slot reserves
+ * its height up front (zero CLS) and lazy-initializes.
+ */
+import { ADSENSE_PUB_ID } from '../config.js';
+
+interface Props {
+  /** 'banner' (728×90 max, in-content), 'rect' (336×280), 'sidebar' (300×600 sticky) */
+  variant?: 'banner' | 'rect' | 'sidebar';
+}
+const { variant = 'banner' } = Astro.props;
+const heights = { banner: 'min-h-[100px]', rect: 'min-h-[280px]', sidebar: 'min-h-[600px]' };
+---
+{ADSENSE_PUB_ID && (
+  <div class={`my-6 ${heights[variant]} flex flex-col items-center justify-center`}>
+    <span class="text-[10px] uppercase tracking-widest text-ink-400 mb-1">Advertisement</span>
+    <ins
+      class="adsbygoogle block w-full"
+      style="display:block"
+      data-ad-client={ADSENSE_PUB_ID}
+      data-ad-format="auto"
+      data-full-width-responsive="true"
+    ></ins>
+    <script is:inline>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+)}

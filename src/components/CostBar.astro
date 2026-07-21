@@ -1,0 +1,28 @@
+---
+/**
+ * One labeled magnitude bar. Value text always rendered (bars are never
+ * color-alone). `highlight` = amber data mark; context rows = neutral gray.
+ */
+interface Props {
+  label: string;
+  value: number; // dollars
+  max: number;
+  display: string;
+  href?: string;
+  highlight?: boolean;
+}
+const { label, value, max, display, href, highlight = false } = Astro.props;
+const pct = Math.max(1.5, Math.min(100, (value / max) * 100));
+---
+<div class="grid grid-cols-[minmax(7rem,12rem)_1fr_auto] items-center gap-3 py-1.5">
+  {href
+    ? <a href={href} class="text-sm text-ink-700 dark:text-ink-300 hover:text-brand-700 dark:hover:text-brand-400 truncate" title={label}>{label}</a>
+    : <span class:list={['text-sm truncate', highlight ? 'font-semibold text-ink-900 dark:text-ink-100' : 'text-ink-700 dark:text-ink-300']} title={label}>{label}</span>}
+  <div class="h-2.5 rounded-full bg-ink-200/60 dark:bg-ink-800/80 overflow-hidden" aria-hidden="true">
+    <div
+      class:list={['h-full rounded-full', highlight ? 'bg-brand-600' : 'bg-ink-400 dark:bg-ink-500']}
+      style={`width:${pct}%`}
+    ></div>
+  </div>
+  <span class:list={['text-sm tabular text-right w-16', highlight ? 'font-bold text-ink-900 dark:text-ink-100' : 'text-ink-600 dark:text-ink-400']}>{display}</span>
+</div>

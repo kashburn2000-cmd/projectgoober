@@ -1,0 +1,3 @@
+# ads.txt — populate after AdSense approval.
+# Replace pub-0000000000000000 with your real publisher ID, then uncomment:
+# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0

@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { SITE_NAME, SITE_URL, CONTACT_EMAIL } from '../config.js';
+import { breadcrumbSchema } from '../lib/seo';
+
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Terms of Use', href: '/terms/' },
+];
+const updated = 'July 2026';
+---
+<BaseLayout title={`Terms of Use — ${SITE_NAME}`} description={`The terms that govern use of ${SITE_NAME}: informational estimates, no warranties, and sensible limitations.`} schema={[breadcrumbSchema(crumbs)]}>
+  <div class="max-w-3xl mx-auto px-4 pt-6 pb-10">
+    <Breadcrumbs crumbs={crumbs} />
+    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-ink-900 dark:text-ink-100">Terms of Use</h1>
+    <p class="mt-2 text-sm text-ink-500">Last updated: {updated}</p>
+    <div class="mt-6 prose-custom">
+      <p>By using {SITE_NAME} ({SITE_URL}), you agree to these terms.</p>
+
+      <h2>Informational purposes only</h2>
+      <p>
+        Everything on this site — costs, rates, wattages, comparisons, calculators, and guides — consists of
+        <strong>estimates for general informational purposes</strong>. Figures are based on published averages and
+        typical usage assumptions (see our <a href="/methodology/">methodology</a>) and are not measurements of
+        your equipment, predictions of your bill, or professional advice of any kind — including financial,
+        legal, or electrical advice. Electrical work should be performed by qualified professionals; decisions
+        with significant cost or safety implications deserve professional guidance and your own utility's actual
+        rates.
+      </p>
+
+      <h2>No warranties</h2>
+      <p>
+        The site is provided "as is" and "as available," without warranties of any kind, express or implied,
+        including accuracy, completeness, fitness for a particular purpose, or uninterrupted availability. Rates
+        change, appliances vary, and despite our care, errors are possible.
+      </p>
+
+      <h2>Limitation of liability</h2>
+      <p>
+        To the maximum extent permitted by law, {SITE_NAME} and its operators shall not be liable for any
+        damages arising from use of, or reliance on, the site or its content, including indirect, incidental,
+        or consequential damages.
+      </p>
+
+      <h2>Intellectual property</h2>
+      <p>
+        Site content, design, and code are protected by applicable intellectual-property laws. You may link to
+        any page and quote reasonable excerpts with attribution. Wholesale reproduction of our datasets or
+        content requires permission — <a href={`mailto:${CONTACT_EMAIL}`}>ask us</a>; we're reasonable.
+      </p>
+
+      <h2>Third-party links and ads</h2>
+      <p>
+        The site contains links to third-party sites and displays third-party advertising. We are not
+        responsible for third-party content, products, or practices. Advertising is governed by our
+        <a href="/privacy/">privacy policy</a>.
+      </p>
+
+      <h2>Changes</h2>
+      <p>We may update these terms by posting a revised version on this page. Continued use after changes constitutes acceptance.</p>
+
+      <h2>Contact</h2>
+      <p><a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></p>
+    </div>
+  </div>
+</BaseLayout>

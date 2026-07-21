@@ -1,0 +1,203 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import StatCard from '../../../components/StatCard.astro';
+import CostBar from '../../../components/CostBar.astro';
+import FaqBlock from '../../../components/FaqBlock.astro';
+import AdSlot from '../../../components/AdSlot.astro';
+import CostCalculator from '../../../islands/CostCalculator.tsx';
+import { appliances, rates, comparisons, CATEGORIES, stateSlug, statesByRate } from '../../../lib/data';
+import { costs, money, kwh, wattsLabel, usageLabel } from '../../../lib/calc';
+import { applianceFaqs, tipsFor } from '../../../lib/content';
+import { breadcrumbSchema, faqSchema } from '../../../lib/seo';
+
+export function getStaticPaths() {
+  return appliances.map((a) => ({ params: { slug: a.slug }, props: { appliance: a } }));
+}
+
+const { appliance: a } = Astro.props;
+const nat = costs(a, rates.national.cents);
+const year = rates.period.slice(0, 4);
+
+const stateRows = rates.states.map((s) => ({ s, c: costs(a, s.cents) }));
+const cheapest5 = [...stateRows].sort((x, y) => x.c.month - y.c.month).slice(0, 5);
+const priciest5 = [...stateRows].sort((x, y) => y.c.month - x.c.month).slice(0, 5);
+const maxMonth = priciest5[0].c.month;
+
+const related = appliances.filter((r) => r.cat === a.cat && r.slug !== a.slug).slice(0, 6);
+const versus = comparisons.filter((c) => c.a === a.slug || c.b === a.slug);
+const faqs = applianceFaqs(a);
+const tips = tipsFor(a);
+const cat = CATEGORIES[a.cat];
+
+const stateOptions = rates.states.map((s) => ({ abbr: s.abbr, name: s.name, cents: s.cents }));
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Appliances', href: '/appliances/' },
+  { name: a.name, href: `/appliance/${a.slug}/` },
+];
+
+const title = `${a.name} Electricity Cost: Per Hour, Month & Year (${year})`;
+const description = `A ${a.name.toLowerCase()} costs about ${money(nat.month)}/month to run at typical usage (${usageLabel(a.use)}) and current U.S. rates — see the exact cost in your state, ${a.use.t === 'h' ? 'per hour' : 'per use'}, per day, and per year.`;
+const schema = [breadcrumbSchema(crumbs), faqSchema(faqs)];
+---
+<BaseLayout title={title} description={description} schema={schema}>
+  <div class="max-w-6xl mx-auto px-4 pt-6">
+    <Breadcrumbs crumbs={crumbs} />
+    <div class="lg:grid lg:grid-cols-[1fr_300px] lg:gap-10">
+      <article>
+        <header>
+          <p class="text-xs font-semibold uppercase tracking-widest text-brand-700 dark:text-brand-400 mb-2">{cat.icon} {cat.label}</p>
+          <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-ink-900 dark:text-ink-100">
+            How Much Does a {a.name} Cost to Run?
+          </h1>
+          <p class="mt-4 text-lg text-ink-600 dark:text-ink-400 leading-relaxed">
+            At the current U.S. average rate of <strong class="text-ink-900 dark:text-ink-100">{rates.national.cents}¢/kWh</strong> ({rates.periodLabel}),
+            a {a.name.toLowerCase()} costs about <strong class="text-brand-700 dark:text-brand-400">{money(nat.month)} per month</strong> at
+            typical usage — {usageLabel(a.use)}.
+          </p>
+        </header>
+
+        <div class="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {a.use.t === 'h'
+            ? <StatCard label="Per hour" value={money(nat.hour!)} sub={`at ${wattsLabel(a)}`} />
+            : <StatCard label="Per use" value={money(nat.perUse!)} sub={`${a.use.kwh} kWh per use`} />}
+          <StatCard label="Per day" value={money(nat.day)} sub={usageLabel(a.use)} />
+          <StatCard label="Per month" value={money(nat.month)} sub={`${kwh(nat.kwhMonth)} kWh`} accent />
+          <StatCard label="Per year" value={money(nat.year)} sub={`${kwh(nat.kwhYear)} kWh`} />
+        </div>
+
+        <p class="mt-6 prose-custom">{a.blurb}</p>
+
+        <AdSlot variant="banner" />
+
+        <section class="mt-8">
+          <h2 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-100 mb-4">Calculate it for your home</h2>
+          <CostCalculator
+            client:visible
+            states={stateOptions}
+            nationalCents={rates.national.cents}
+            mode={a.use.t === 'h' ? 'continuous' : 'cycle'}
+            initialWatts={a.watts}
+            initialHours={a.use.t === 'h' ? a.use.h : 4}
+            initialKwhPerUse={a.use.t === 'c' ? a.use.kwh : 1}
+            initialUsesPerWeek={a.use.t === 'c' ? a.use.cpw : 5}
+            compact
+          />
+        </section>
+
+        <section class="mt-10">
+          <h2 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-100 mb-2">Cheapest and most expensive states</h2>
+          <p class="text-sm text-ink-600 dark:text-ink-400 mb-4">Monthly cost at typical usage, using each state's current average residential rate.</p>
+          <div class="rounded-2xl border border-ink-200 dark:border-ink-800 bg-white dark:bg-ink-900 p-5">
+            {cheapest5.map(({ s, c }) => (
+              <CostBar label={s.name} value={c.month} max={maxMonth} display={money(c.month)} href={a.tier === 1 ? `/appliance/${a.slug}/${stateSlug(s)}/` : undefined} />
+            ))}
+            <div class="my-2 border-t border-dashed border-ink-200 dark:border-ink-700"></div>
+            <CostBar label={`U.S. average`} value={nat.month} max={maxMonth} display={money(nat.month)} highlight />
+            <div class="my-2 border-t border-dashed border-ink-200 dark:border-ink-700"></div>
+            {priciest5.toReversed().map(({ s, c }) => (
+              <CostBar label={s.name} value={c.month} max={maxMonth} display={money(c.month)} href={a.tier === 1 ? `/appliance/${a.slug}/${stateSlug(s)}/` : undefined} />
+            ))}
+          </div>
+        </section>
+
+        <section class="mt-10">
+          <h2 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-100 mb-4">Cost in every state</h2>
+          <div class="overflow-x-auto rounded-2xl border border-ink-200 dark:border-ink-800">
+            <table class="w-full text-sm bg-white dark:bg-ink-900">
+              <thead>
+                <tr class="text-left text-xs uppercase tracking-wide text-ink-500 border-b-2 border-ink-200 dark:border-ink-700">
+                  <th class="px-4 py-3">State</th>
+                  <th class="px-4 py-3 text-right">Rate (¢/kWh)</th>
+                  <th class="px-4 py-3 text-right">{a.use.t === 'h' ? 'Per hour' : 'Per use'}</th>
+                  <th class="px-4 py-3 text-right">Per month</th>
+                  <th class="px-4 py-3 text-right">Per year</th>
+                </tr>
+              </thead>
+              <tbody>
+                {statesByRate.map((s) => {
+                  const c = costs(a, s.cents);
+                  return (
+                    <tr class="border-b border-ink-100 dark:border-ink-800 last:border-0 hover:bg-brand-50/50 dark:hover:bg-brand-900/10">
+                      <td class="px-4 py-2.5">
+                        {a.tier === 1
+                          ? <a href={`/appliance/${a.slug}/${stateSlug(s)}/`} class="text-brand-700 dark:text-brand-400 hover:underline font-medium">{s.name}</a>
+                          : <span class="text-ink-800 dark:text-ink-200">{s.name}</span>}
+                      </td>
+                      <td class="px-4 py-2.5 text-right tabular text-ink-600 dark:text-ink-400">{s.cents.toFixed(1)}</td>
+                      <td class="px-4 py-2.5 text-right tabular">{money(a.use.t === 'h' ? c.hour! : c.perUse!)}</td>
+                      <td class="px-4 py-2.5 text-right tabular font-semibold">{money(c.month)}</td>
+                      <td class="px-4 py-2.5 text-right tabular">{money(c.year)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="mt-10">
+          <h2 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-100 mb-4">How to lower the cost</h2>
+          <ul class="space-y-3">
+            {tips.map((t) => (
+              <li class="flex gap-3 rounded-xl border border-ink-200 dark:border-ink-800 bg-white dark:bg-ink-900 p-4 text-sm text-ink-700 dark:text-ink-300">
+                <span class="text-brand-600 shrink-0 mt-0.5" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </span>
+                {t}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <FaqBlock faqs={faqs} />
+
+        <AdSlot variant="banner" />
+
+        {versus.length > 0 && (
+          <section class="mt-10">
+            <h2 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-100 mb-4">Compare</h2>
+            <div class="grid gap-3 sm:grid-cols-2">
+              {versus.map((v) => {
+                const other = appliances.find((x) => x.slug === (v.a === a.slug ? v.b : v.a))!;
+                return (
+                  <a href={`/compare/${v.a}-vs-${v.b}/`} class="rounded-xl border border-ink-200 dark:border-ink-800 bg-white dark:bg-ink-900 p-4 hover:border-brand-400 dark:hover:border-brand-600 transition-colors">
+                    <span class="text-sm font-semibold text-ink-900 dark:text-ink-100">{a.name} vs {other.name}</span>
+                    <span class="block mt-1 text-xs text-ink-500">Which costs less to run →</span>
+                  </a>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {related.length > 0 && (
+          <section class="mt-10 mb-4">
+            <h2 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-100 mb-4">More in {cat.label}</h2>
+            <div class="flex flex-wrap gap-2">
+              {related.map((r) => (
+                <a href={`/appliance/${r.slug}/`} class="rounded-lg border border-ink-200 dark:border-ink-800 bg-white dark:bg-ink-900 px-3 py-1.5 text-sm text-ink-700 dark:text-ink-300 hover:border-brand-400 hover:text-brand-700 dark:hover:text-brand-400 transition-colors">{r.name}</a>
+              ))}
+            </div>
+          </section>
+        )}
+      </article>
+
+      <aside class="hidden lg:block">
+        <div class="sticky top-20">
+          <div class="rounded-2xl border border-ink-200 dark:border-ink-800 bg-white dark:bg-ink-900 p-5 text-sm">
+            <h2 class="font-bold text-ink-900 dark:text-ink-100 mb-3">Quick facts</h2>
+            <dl class="space-y-2 text-ink-600 dark:text-ink-400">
+              <div class="flex justify-between gap-2"><dt>Typical power</dt><dd class="tabular font-medium text-ink-900 dark:text-ink-100">{wattsLabel(a)}</dd></div>
+              <div class="flex justify-between gap-2"><dt>Typical usage</dt><dd class="text-right font-medium text-ink-900 dark:text-ink-100">{usageLabel(a.use)}</dd></div>
+              <div class="flex justify-between gap-2"><dt>Energy/month</dt><dd class="tabular font-medium text-ink-900 dark:text-ink-100">{kwh(nat.kwhMonth)} kWh</dd></div>
+              <div class="flex justify-between gap-2"><dt>Cost/month (US avg)</dt><dd class="tabular font-bold text-brand-700 dark:text-brand-400">{money(nat.month)}</dd></div>
+            </dl>
+          </div>
+          <AdSlot variant="sidebar" />
+        </div>
+      </aside>
+    </div>
+  </div>
+</BaseLayout>

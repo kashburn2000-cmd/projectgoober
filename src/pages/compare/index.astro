@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import { comparisons, getAppliance, rates } from '../../lib/data';
+import { costs, money } from '../../lib/calc';
+import { breadcrumbSchema } from '../../lib/seo';
+
+const rows = comparisons.map((c) => {
+  const a = getAppliance(c.a);
+  const b = getAppliance(c.b);
+  return { c, a, b, am: costs(a, rates.national.cents).month, bm: costs(b, rates.national.cents).month };
+});
+
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Compare', href: '/compare/' },
+];
+const title = `Appliance Cost Comparisons: Which Costs Less to Run? (${rates.period.slice(0, 4)})`;
+const description = `Head-to-head running-cost comparisons — space heater vs heat pump, air fryer vs oven, electric vs gas dryer, and ${comparisons.length - 3} more — with real math at current electricity rates.`;
+---
+<BaseLayout title={title} description={description} schema={[breadcrumbSchema(crumbs)]}>
+  <div class="max-w-6xl mx-auto px-4 pt-6">
+    <Breadcrumbs crumbs={crumbs} />
+    <header class="max-w-3xl">
+      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-ink-900 dark:text-ink-100">
+        Which Costs Less to Run?
+      </h1>
+      <p class="mt-4 text-lg text-ink-600 dark:text-ink-400 leading-relaxed">
+        {comparisons.length} head-to-head matchups settled with actual math — typical usage, current
+        U.S. average rate of {rates.national.cents}¢/kWh, and a clear verdict.
+      </p>
+    </header>
+
+    <AdSlot variant="banner" />
+
+    <div class="mt-8 mb-4 grid gap-3 sm:grid-cols-2">
+      {rows.map(({ c, a, b, am, bm }) => (
+        <a href={`/compare/${c.a}-vs-${c.b}/`} class="group rounded-xl border border-ink-200 dark:border-ink-800 bg-white dark:bg-ink-900 p-5 hover:border-brand-400 dark:hover:border-brand-600 hover:shadow-md transition-all">
+          <div class="flex items-center justify-between gap-2 text-sm font-semibold text-ink-900 dark:text-ink-100">
+            <span class:list={[am <= bm && 'text-brand-700 dark:text-brand-400']}>{a.name}</span>
+            <span class="text-xs font-bold uppercase text-ink-400">vs</span>
+            <span class:list={[bm < am && 'text-brand-700 dark:text-brand-400', 'text-right']}>{b.name}</span>
+          </div>
+          <div class="mt-2 flex items-center justify-between text-xs tabular text-ink-500">
+            <span>{money(am)}/mo</span>
+            <span>{money(bm)}/mo</span>
+          </div>
+          <p class="mt-3 text-xs text-ink-500 group-hover:text-ink-700 dark:group-hover:text-ink-300">Read the verdict →</p>
+        </a>
+      ))}
+    </div>
+  </div>
+</BaseLayout>

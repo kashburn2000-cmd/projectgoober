@@ -1,0 +1,65 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { SITE_NAME, SITE_URL, CONTACT_EMAIL } from '../config.js';
+import { breadcrumbSchema } from '../lib/seo';
+
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Privacy Policy', href: '/privacy/' },
+];
+const updated = 'July 2026';
+---
+<BaseLayout title={`Privacy Policy — ${SITE_NAME}`} description={`How ${SITE_NAME} handles data: what we collect (very little), cookies and advertising, analytics, and your choices.`} schema={[breadcrumbSchema(crumbs)]}>
+  <div class="max-w-3xl mx-auto px-4 pt-6 pb-10">
+    <Breadcrumbs crumbs={crumbs} />
+    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-ink-900 dark:text-ink-100">Privacy Policy</h1>
+    <p class="mt-2 text-sm text-ink-500">Last updated: {updated}</p>
+    <div class="mt-6 prose-custom">
+      <p>
+        This policy describes how {SITE_NAME} ({SITE_URL}) handles information when you use the site.
+        The short version: we run a static informational website, we don't require accounts, and we collect
+        as little as possible.
+      </p>
+
+      <h2>Information we collect</h2>
+      <ul>
+        <li><strong>No accounts, no forms.</strong> We don't ask you to register or submit personal information to use the site.</li>
+        <li><strong>Calculator inputs stay in your browser.</strong> Selections you make in our calculators and the bill analyzer (state, appliances, usage) are processed entirely on your device and are not transmitted to us. Preferences such as dark mode and cookie-consent choices are stored locally in your browser's storage.</li>
+        <li><strong>Server logs.</strong> Our hosting provider (Cloudflare) processes standard technical data — IP address, user agent, requested pages — to serve and secure the site.</li>
+        <li><strong>Analytics.</strong> If enabled, we use privacy-focused, cookieless analytics (Cloudflare Web Analytics) that measure aggregate page performance without tracking individuals across sites.</li>
+      </ul>
+
+      <h2>Advertising and cookies</h2>
+      <p>
+        {SITE_NAME} is supported by advertising. We use Google AdSense, which may use cookies and similar
+        technologies to serve and measure ads. Where required, we request your consent before any advertising
+        cookies are set, and we signal your choice to Google via Consent Mode. Depending on your consent and
+        region, Google may serve personalized or non-personalized ads.
+      </p>
+      <ul>
+        <li>Google's use of advertising cookies is described at <a href="https://policies.google.com/technologies/ads" rel="noopener">policies.google.com/technologies/ads</a>.</li>
+        <li>You can manage ad personalization at <a href="https://adssettings.google.com" rel="noopener">adssettings.google.com</a> and opt out of third-party vendor cookies at <a href="https://optout.aboutads.info" rel="noopener">optout.aboutads.info</a>.</li>
+        <li>You can change or withdraw your consent at any time by clearing this site's data in your browser, which resets the consent banner.</li>
+      </ul>
+
+      <h2>Your rights</h2>
+      <p>
+        Depending on where you live (including the EEA/UK under GDPR and California under CCPA/CPRA), you may
+        have rights to access, correct, or delete personal information, and to opt out of the "sale" or
+        "sharing" of personal information as those terms are defined locally. Because we hold essentially no
+        personal data ourselves, most such requests relate to advertising partners — the links above are the
+        fastest route. For anything else, contact us and we'll help: <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+      </p>
+
+      <h2>Children</h2>
+      <p>This site is a general-audience informational resource and is not directed at children under 13. We do not knowingly collect personal information from children.</p>
+
+      <h2>Changes</h2>
+      <p>We'll post any changes to this policy on this page and update the date above. Material changes to how advertising or consent works will be reflected in the consent banner.</p>
+
+      <h2>Contact</h2>
+      <p>Questions about this policy: <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.</p>
+    </div>
+  </div>
+</BaseLayout>

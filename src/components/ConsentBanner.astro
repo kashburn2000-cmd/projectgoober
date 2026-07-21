@@ -1,0 +1,60 @@
+---
+/**
+ * Lightweight cookie-consent banner with Google Consent Mode v2.
+ * Only rendered when ads are active. Defaults everything to 'denied' before any
+ * Google script loads; visitor choice is stored in localStorage.
+ *
+ * Note for EEA/UK traffic at scale: enable Google's certified CMP in
+ * AdSense → Privacy & messaging as well. This banner covers Consent Mode
+ * signals and a compliant default-deny.
+ */
+import { ADSENSE_PUB_ID } from '../config.js';
+---
+{ADSENSE_PUB_ID && (
+  <>
+    <div id="consent-banner" class="hidden fixed bottom-0 inset-x-0 z-50 border-t border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 shadow-2xl">
+      <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+        <p class="text-sm text-ink-700 dark:text-ink-300 flex-1">
+          We use cookies to serve ads that keep this site free. See our
+          <a href="/privacy/" class="underline">privacy policy</a>.
+        </p>
+        <div class="flex gap-2 shrink-0">
+          <button id="consent-reject" type="button" class="px-4 py-2 text-sm font-medium rounded-lg border border-ink-300 dark:border-ink-600 text-ink-700 dark:text-ink-300 hover:bg-ink-100 dark:hover:bg-ink-800">Reject</button>
+          <button id="consent-accept" type="button" class="px-4 py-2 text-sm font-semibold rounded-lg bg-brand-600 text-white hover:bg-brand-700">Accept</button>
+        </div>
+      </div>
+    </div>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'denied',
+      });
+      (function () {
+        var KEY = 'consent-choice';
+        var saved = localStorage.getItem(KEY);
+        var banner = document.getElementById('consent-banner');
+        function apply(granted) {
+          gtag('consent', 'update', {
+            ad_storage: granted ? 'granted' : 'denied',
+            ad_user_data: granted ? 'granted' : 'denied',
+            ad_personalization: granted ? 'granted' : 'denied',
+            analytics_storage: granted ? 'granted' : 'denied',
+          });
+        }
+        if (saved === 'granted') { apply(true); return; }
+        if (saved === 'denied') { apply(false); return; }
+        banner.classList.remove('hidden');
+        document.getElementById('consent-accept').addEventListener('click', function () {
+          localStorage.setItem(KEY, 'granted'); apply(true); banner.classList.add('hidden');
+        });
+        document.getElementById('consent-reject').addEventListener('click', function () {
+          localStorage.setItem(KEY, 'denied'); apply(false); banner.classList.add('hidden');
+        });
+      })();
+    </script>
+  </>
+)}

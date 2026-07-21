@@ -1,0 +1,84 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { SITE_NAME } from '../config.js';
+import { rates, appliances } from '../lib/data';
+import { breadcrumbSchema } from '../lib/seo';
+
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Methodology', href: '/methodology/' },
+];
+---
+<BaseLayout title={`How ${SITE_NAME} Calculates Costs: Data Sources & Methodology`} description={`Where our electricity rates come from, how appliance wattages and usage patterns are chosen, and the exact formulas behind every number on ${SITE_NAME}.`} schema={[breadcrumbSchema(crumbs)]}>
+  <div class="max-w-3xl mx-auto px-4 pt-6 pb-10">
+    <Breadcrumbs crumbs={crumbs} />
+    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-ink-900 dark:text-ink-100">How We Calculate Costs</h1>
+    <div class="mt-6 prose-custom">
+      <p>
+        Every number on {SITE_NAME} is computed from two inputs: <strong>current state-level electricity
+        rates</strong> and <strong>realistic appliance power data</strong>. This page documents both, plus the
+        formulas connecting them, so you can judge — and adjust — every estimate we publish.
+      </p>
+
+      <h2>Electricity rates</h2>
+      <p>
+        We use the <strong>average residential retail electricity price per state</strong> published by the
+        U.S. Energy Information Administration (EIA), currently reflecting <strong>{rates.periodLabel}</strong> data.
+        Rates are refreshed monthly as the EIA publishes new figures. The current national average in our
+        dataset is {rates.national.cents}¢/kWh.
+      </p>
+      <p>
+        A state average is exactly that — your utility, plan, and tier may differ, and your <em>effective</em>
+        rate (bill total ÷ kWh, including delivery charges and taxes) is typically somewhat higher than
+        nominal supply rates. For maximum accuracy, compute your effective rate from a recent bill and use it
+        in our <a href="/calculator/">calculator</a>, which accepts any rate via the state selector's underlying math.
+      </p>
+
+      <h2>Appliance power data</h2>
+      <p>
+        Our database covers {appliances.length} appliances. For each we publish a <strong>typical wattage</strong> and
+        a realistic range, drawn from U.S. Department of Energy and ENERGY STAR published figures, manufacturer
+        specifications, and the physics of the device class (for example, resistance heaters converting
+        electricity to heat 1:1). Two usage models are used:
+      </p>
+      <ul>
+        <li><strong>Continuous devices</strong> (heaters, TVs, fridges): typical watts × typical hours per day. For
+        cycling devices like refrigerators, the wattage shown is an <em>effective average</em> that already accounts
+        for compressor duty cycle.</li>
+        <li><strong>Session devices</strong> (dishwashers, dryers, EV charging): energy per use (kWh) × uses per week.</li>
+      </ul>
+      <p>
+        "Typical usage" assumptions are stated on every appliance page and are deliberately ordinary — an
+        8-hour winter day for a space heater, five dryer loads a week for a family. Your habits will differ;
+        that's why every page embeds a calculator with adjustable inputs.
+      </p>
+
+      <h2>The formulas</h2>
+      <ul>
+        <li>kWh/day = watts ÷ 1,000 × hours/day (continuous) or kWh/use × uses/week ÷ 7 (session)</li>
+        <li>Cost/day = kWh/day × rate</li>
+        <li>Cost/month = cost/day × 30.4 (average month length)</li>
+        <li>Cost/year = cost/day × 365</li>
+      </ul>
+      <p>
+        Where standby power is meaningful, kWh/day adds standby watts × non-active hours. Monthly figures for
+        seasonal appliances (AC, holiday lights) describe an <em>in-season</em> month, noted on those pages.
+      </p>
+
+      <h2>What our numbers are — and aren't</h2>
+      <p>
+        These are planning estimates, not measurements of your specific devices, and not billing predictions.
+        They're built to be honest at the "which of these is big?" level that drives good decisions. For your
+        own exact figures, a plug-in energy meter is cheap and definitive — we explain the method in
+        <a href="/guides/how-to-measure-appliance-power/">How to Measure What Any Appliance Really Uses</a>.
+      </p>
+
+      <h2>Corrections</h2>
+      <p>
+        If you believe a figure is wrong, we want to know. Reach us via the <a href="/contact/">contact page</a> —
+        corrections are reviewed against primary sources and published promptly.
+      </p>
+    </div>
+  </div>
+</BaseLayout>

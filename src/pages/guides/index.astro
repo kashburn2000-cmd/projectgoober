@@ -1,0 +1,36 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import { breadcrumbSchema } from '../../lib/seo';
+
+const guides = (await getCollection('guides')).sort((a, b) => b.data.date.localeCompare(a.data.date));
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Guides', href: '/guides/' },
+];
+const title = 'Home Electricity Guides: Lower Your Bill With Real Math';
+const description = `${guides.length} practical guides to understanding and cutting your electric bill — why bills spike, what standby power really costs, when to run appliances, and more.`;
+---
+<BaseLayout title={title} description={description} schema={[breadcrumbSchema(crumbs)]}>
+  <div class="max-w-6xl mx-auto px-4 pt-6">
+    <Breadcrumbs crumbs={crumbs} />
+    <header class="max-w-3xl">
+      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-ink-900 dark:text-ink-100">Guides</h1>
+      <p class="mt-4 text-lg text-ink-600 dark:text-ink-400 leading-relaxed">
+        Practical, numbers-first guides to understanding your electric bill — and shrinking it.
+      </p>
+    </header>
+    <AdSlot variant="banner" />
+    <div class="mt-8 mb-4 grid gap-4 sm:grid-cols-2">
+      {guides.map((g) => (
+        <a href={`/guides/${g.id}/`} class="group rounded-2xl border border-ink-200 dark:border-ink-800 bg-white dark:bg-ink-900 p-6 hover:border-brand-400 dark:hover:border-brand-600 hover:shadow-md transition-all">
+          <h2 class="text-lg font-bold text-ink-900 dark:text-ink-100 group-hover:text-brand-700 dark:group-hover:text-brand-400 leading-snug">{g.data.title}</h2>
+          <p class="mt-2 text-sm text-ink-600 dark:text-ink-400 leading-relaxed">{g.data.description}</p>
+          <p class="mt-3 text-xs font-medium text-brand-700 dark:text-brand-400">Read the guide →</p>
+        </a>
+      ))}
+    </div>
+  </div>
+</BaseLayout>
