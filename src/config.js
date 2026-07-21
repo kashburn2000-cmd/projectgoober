@@ -6,14 +6,14 @@
  * available, change SITE_NAME + SITE_URL here and rebuild — nothing else.
  */
 
-export const SITE_NAME = 'WattBill';
-export const SITE_URL = 'https://wattbill.com';
+export const SITE_NAME = 'Billowatt';
+export const SITE_URL = 'https://billowatt.com';
 export const SITE_TAGLINE = 'What every plug in your home really costs';
 export const SITE_DESCRIPTION =
   'Find out what any appliance costs to run using current electricity rates for your state — not a stale national average. Free calculators, state-by-state data, and a bill analyzer.';
 
 /** Contact address — set up free Cloudflare Email Routing to forward this. */
-export const CONTACT_EMAIL = 'hello@wattbill.com';
+export const CONTACT_EMAIL = 'hello@billowatt.com';
 
 /**
  * Google AdSense publisher ID, e.g. 'ca-pub-1234567890123456'.

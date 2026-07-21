@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://wattbill.com/sitemap-index.xml
+Sitemap: https://billowatt.com/sitemap-index.xml

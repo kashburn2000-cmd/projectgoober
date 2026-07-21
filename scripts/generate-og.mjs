@@ -12,7 +12,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const pub = join(__dirname, '..', 'public');
 mkdirSync(join(pub, 'og'), { recursive: true });
 
-const SITE = 'WattBill';
+const SITE = 'Billowatt';
 const TAGLINE = 'What every plug in your home really costs';
 const SUB = 'Current rates for all 50 states · 140+ appliances · free calculators';
 

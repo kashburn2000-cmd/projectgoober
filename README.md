@@ -1,4 +1,4 @@
-# WattBill
+# Billowatt
 
 **What every plug in your home really costs.** A state-aware home electricity cost
 platform: interactive bill analyzer, cost-to-run calculators, and ~4,000
@@ -38,10 +38,10 @@ one file to change if the domain choice differs.
 
 ### 1. Domain + hosting (~15 min)
 
-1. Buy the domain in Cloudflare (Registrar → Register). Preferred: `wattbill.com`;
-   fallbacks in order: `plugcost.com`, `wattcosts.com`, `costtorun.com`, `kwhcost.com`.
-   **If not using wattbill.com**: update `SITE_NAME`, `SITE_URL`, `CONTACT_EMAIL` in
-   `src/config.js` and the sitemap URL in `public/robots.txt`.
+1. Buy `billowatt.com` in Cloudflare (Registrar → Register). The site is already
+   branded for it. (If the name ever changes: update `SITE_NAME`, `SITE_URL`,
+   `CONTACT_EMAIL` in `src/config.js`, the sitemap URL in `public/robots.txt`,
+   and rerun `npm run og`.)
 2. Cloudflare dashboard → **Workers & Pages → Create → Pages → Connect to Git** →
    pick this repo and branch.
    - Build command: `npm run build`
