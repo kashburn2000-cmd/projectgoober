@@ -6,11 +6,14 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview",
+    "preview": "npm run build && wrangler dev",
     "fetch-rates": "node scripts/fetch-rates.mjs",
-    "og": "node scripts/generate-og.mjs"
+    "og": "node scripts/generate-og.mjs",
+    "deploy": "npm run build && wrangler deploy",
+    "cf-typegen": "wrangler types"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "12",
     "@astrojs/preact": "^4.0.0",
     "@astrojs/sitemap": "^3.2.0",
     "astro": "^5.0.0",
@@ -19,6 +22,7 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.0.0",
     "sharp": "^0.33.0",
-    "tailwindcss": "^4.0.0"
+    "tailwindcss": "^4.0.0",
+    "wrangler": "^4.113.0"
   }
 }

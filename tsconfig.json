@@ -1,13 +1,22 @@
 {
-  "extends": "astro/tsconfigs/base",
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "jsxImportSource": "preact",
-    "baseUrl": ".",
-    "paths": {
-      "~/*": ["src/*"]
-    }
-  },
-  "include": ["src/**/*", "astro.config.mjs"],
-  "exclude": ["dist", "node_modules"]
+	"extends": "astro/tsconfigs/base",
+	"compilerOptions": {
+		"jsx": "react-jsx",
+		"jsxImportSource": "preact",
+		"baseUrl": ".",
+		"paths": {
+			"~/*": [
+				"src/*"
+			]
+		}
+	},
+	"include": [
+		"src/**/*",
+		"astro.config.mjs",
+		"./worker-configuration.d.ts"
+	],
+	"exclude": [
+		"dist",
+		"node_modules"
+	]
 }
