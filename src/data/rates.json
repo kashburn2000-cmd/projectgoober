@@ -1,6 +1,6 @@
 {
-  "period": "2026-06",
-  "periodLabel": "June 2026",
+  "period": "2026-07",
+  "periodLabel": "July 2026",
   "source": "U.S. Energy Information Administration (EIA), average residential retail electricity price",
   "sourceUrl": "https://www.eia.gov/electricity/data.php",
   "national": {
@@ -19,154 +19,154 @@
       "abbr": "AK",
       "name": "Alaska",
       "region": "West",
-      "cents": 28.2,
+      "cents": 28.8,
       "prev": 23.6
     },
     {
       "abbr": "AZ",
       "name": "Arizona",
       "region": "West",
-      "cents": 15.2,
+      "cents": 15.4,
       "prev": 14.5
     },
     {
       "abbr": "AR",
       "name": "Arkansas",
       "region": "South",
-      "cents": 14.1,
+      "cents": 14.3,
       "prev": 12.3
     },
     {
       "abbr": "CA",
       "name": "California",
       "region": "West",
-      "cents": 34.7,
+      "cents": 33.6,
       "prev": 30.2
     },
     {
       "abbr": "CO",
       "name": "Colorado",
       "region": "West",
-      "cents": 17.1,
+      "cents": 17,
       "prev": 14.6
     },
     {
       "abbr": "CT",
       "name": "Connecticut",
       "region": "Northeast",
-      "cents": 24.3,
+      "cents": 24.2,
       "prev": 27.9
     },
     {
       "abbr": "DE",
       "name": "Delaware",
       "region": "South",
-      "cents": 19.3,
+      "cents": 18.5,
       "prev": 15.9
     },
     {
       "abbr": "DC",
       "name": "Washington, D.C.",
       "region": "South",
-      "cents": 24.4,
+      "cents": 25.2,
       "prev": 16.8
     },
     {
       "abbr": "FL",
       "name": "Florida",
       "region": "South",
-      "cents": 15.1,
+      "cents": 15,
       "prev": 14.5
     },
     {
       "abbr": "GA",
       "name": "Georgia",
       "region": "South",
-      "cents": 16.4,
+      "cents": 16.3,
       "prev": 13.9
     },
     {
       "abbr": "HI",
       "name": "Hawaii",
       "region": "West",
-      "cents": 52.7,
+      "cents": 48,
       "prev": 41
     },
     {
       "abbr": "ID",
       "name": "Idaho",
       "region": "West",
-      "cents": 14.4,
+      "cents": 13.7,
       "prev": 11.3
     },
     {
       "abbr": "IL",
       "name": "Illinois",
       "region": "Midwest",
-      "cents": 19.9,
+      "cents": 19.2,
       "prev": 15.6
     },
     {
       "abbr": "IN",
       "name": "Indiana",
       "region": "Midwest",
-      "cents": 17.5,
+      "cents": 16.7,
       "prev": 15.2
     },
     {
       "abbr": "IA",
       "name": "Iowa",
       "region": "Midwest",
-      "cents": 15.9,
+      "cents": 16,
       "prev": 12.9
     },
     {
       "abbr": "KS",
       "name": "Kansas",
       "region": "Midwest",
-      "cents": 15.7,
+      "cents": 15.3,
       "prev": 13.5
     },
     {
       "abbr": "KY",
       "name": "Kentucky",
       "region": "South",
-      "cents": 14.3,
+      "cents": 13.8,
       "prev": 12.8
     },
     {
       "abbr": "LA",
       "name": "Louisiana",
       "region": "South",
-      "cents": 13.5,
+      "cents": 12.7,
       "prev": 11.6
     },
     {
       "abbr": "ME",
       "name": "Maine",
       "region": "Northeast",
-      "cents": 29.6,
+      "cents": 32.4,
       "prev": 24.6
     },
     {
       "abbr": "MD",
       "name": "Maryland",
       "region": "South",
-      "cents": 21.8,
+      "cents": 21.4,
       "prev": 17.4
     },
     {
       "abbr": "MA",
       "name": "Massachusetts",
       "region": "Northeast",
-      "cents": 29.6,
+      "cents": 30.5,
       "prev": 29
     },
     {
       "abbr": "MI",
       "name": "Michigan",
       "region": "Midwest",
-      "cents": 23,
+      "cents": 23.1,
       "prev": 18.8
     },
     {
@@ -180,98 +180,98 @@
       "abbr": "MS",
       "name": "Mississippi",
       "region": "South",
-      "cents": 14.9,
+      "cents": 14.5,
       "prev": 13.1
     },
     {
       "abbr": "MO",
       "name": "Missouri",
       "region": "Midwest",
-      "cents": 16.2,
+      "cents": 16.1,
       "prev": 11.9
     },
     {
       "abbr": "MT",
       "name": "Montana",
       "region": "West",
-      "cents": 15.1,
+      "cents": 15,
       "prev": 12.2
     },
     {
       "abbr": "NE",
       "name": "Nebraska",
       "region": "Midwest",
-      "cents": 13.3,
+      "cents": 13.8,
       "prev": 11.3
     },
     {
       "abbr": "NV",
       "name": "Nevada",
       "region": "West",
-      "cents": 13.1,
+      "cents": 12.8,
       "prev": 15
     },
     {
       "abbr": "NH",
       "name": "New Hampshire",
       "region": "Northeast",
-      "cents": 27,
+      "cents": 26.6,
       "prev": 23.2
     },
     {
       "abbr": "NJ",
       "name": "New Jersey",
       "region": "Northeast",
-      "cents": 25,
+      "cents": 25.2,
       "prev": 18.2
     },
     {
       "abbr": "NM",
       "name": "New Mexico",
       "region": "West",
-      "cents": 15.1,
+      "cents": 16.1,
       "prev": 14.1
     },
     {
       "abbr": "NY",
       "name": "New York",
       "region": "Northeast",
-      "cents": 29.5,
+      "cents": 29.9,
       "prev": 22.9
     },
     {
       "abbr": "NC",
       "name": "North Carolina",
       "region": "South",
-      "cents": 14.7,
+      "cents": 15.2,
       "prev": 13.1
     },
     {
       "abbr": "ND",
       "name": "North Dakota",
       "region": "Midwest",
-      "cents": 14.1,
+      "cents": 13.4,
       "prev": 10.7
     },
     {
       "abbr": "OH",
       "name": "Ohio",
       "region": "Midwest",
-      "cents": 19.2,
+      "cents": 19.5,
       "prev": 15.6
     },
     {
       "abbr": "OK",
       "name": "Oklahoma",
       "region": "South",
-      "cents": 14.3,
+      "cents": 14.4,
       "prev": 11.7
     },
     {
       "abbr": "OR",
       "name": "Oregon",
       "region": "West",
-      "cents": 16.3,
+      "cents": 16,
       "prev": 14.2
     },
     {
@@ -285,14 +285,14 @@
       "abbr": "RI",
       "name": "Rhode Island",
       "region": "Northeast",
-      "cents": 29.2,
+      "cents": 28.3,
       "prev": 26.6
     },
     {
       "abbr": "SC",
       "name": "South Carolina",
       "region": "South",
-      "cents": 15.6,
+      "cents": 15.5,
       "prev": 14.2
     },
     {
@@ -306,7 +306,7 @@
       "abbr": "TN",
       "name": "Tennessee",
       "region": "South",
-      "cents": 14.1,
+      "cents": 13.7,
       "prev": 12.6
     },
     {
@@ -320,49 +320,49 @@
       "abbr": "UT",
       "name": "Utah",
       "region": "West",
-      "cents": 13.4,
+      "cents": 13.1,
       "prev": 11.5
     },
     {
       "abbr": "VT",
       "name": "Vermont",
       "region": "Northeast",
-      "cents": 24.4,
+      "cents": 23.8,
       "prev": 20.8
     },
     {
       "abbr": "VA",
       "name": "Virginia",
       "region": "South",
-      "cents": 17.2,
+      "cents": 17.6,
       "prev": 14.3
     },
     {
       "abbr": "WA",
       "name": "Washington",
       "region": "West",
-      "cents": 14.9,
+      "cents": 14.7,
       "prev": 11.5
     },
     {
       "abbr": "WV",
       "name": "West Virginia",
       "region": "South",
-      "cents": 15.5,
+      "cents": 15.8,
       "prev": 13.9
     },
     {
       "abbr": "WI",
       "name": "Wisconsin",
       "region": "Midwest",
-      "cents": 19.6,
+      "cents": 19.1,
       "prev": 16.8
     },
     {
       "abbr": "WY",
       "name": "Wyoming",
       "region": "West",
-      "cents": 15.2,
+      "cents": 14.4,
       "prev": 11.2
     }
   ]
